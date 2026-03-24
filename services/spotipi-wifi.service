@@ -1,0 +1,19 @@
+[Unit]
+Description=SpotiPi WiFi Setup (AP + Captive Portal)
+After=network.target
+Conflicts=spotipi.service spotipi-auth.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/spotipi
+ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/wifi/wifi_setup.py
+Restart=always
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spotipi-wifi
+
+[Install]
+WantedBy=multi-user.target

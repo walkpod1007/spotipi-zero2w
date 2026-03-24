@@ -1,0 +1,2 @@
+/* SpotiPi — supplemental styles (most styles are inline in index.html) */
+body { cursor: none; } /* hide cursor in kiosk mode */

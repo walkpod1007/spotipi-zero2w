@@ -1,0 +1,15 @@
+[Unit]
+Description=SpotiPi Boot Orchestrator
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/spotipi/boot/spotipi-boot.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spotipi-boot
+
+[Install]
+WantedBy=multi-user.target

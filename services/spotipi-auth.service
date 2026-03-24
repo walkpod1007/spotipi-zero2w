@@ -1,0 +1,20 @@
+[Unit]
+Description=SpotiPi Spotify Authorization
+After=network-online.target
+Wants=network-online.target
+Conflicts=spotipi.service spotipi-wifi.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/spotipi
+ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/auth/spotify_auth.py
+Restart=always
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spotipi-auth
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,31 @@
+[Unit]
+Description=SpotiPi Now Playing Display
+After=network-online.target graphical.target
+Wants=network-online.target
+Conflicts=spotipi-wifi.service spotipi-auth.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/spotipi
+ExecStartPre=/bin/sleep 3
+ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/display/app.py
+ExecStartPost=/bin/bash -c 'sleep 4 && chromium-browser \
+  --kiosk \
+  --noerrdialogs \
+  --disable-infobars \
+  --no-first-run \
+  --disable-session-crashed-bubble \
+  --check-for-update-interval=31536000 \
+  --disable-features=TranslateUI \
+  --app=http://localhost:5000 &'
+Restart=always
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=spotipi
+
+[Install]
+WantedBy=graphical.target
