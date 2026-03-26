@@ -101,8 +101,11 @@ network={{
         return False
 
 
-def write_spotify_env(client_id: str, client_secret: str) -> bool:
-    """Write Spotify credentials to .env, preserving existing keys."""
+def write_spotify_env(client_id: str, client_secret: str = "") -> bool:
+    """Write Spotify credentials to .env, preserving existing keys.
+
+    PKCE flow does NOT require client_secret; keep it optional.
+    """
     redirect_uri = "http://spotipi.local:8888/callback"
 
     # Determine target .env path
@@ -122,9 +125,13 @@ def write_spotify_env(client_id: str, client_secret: str) -> bool:
                     key, _, val = line.partition("=")
                     existing[key.strip()] = val.strip()
 
-    # Overwrite the three Spotify keys
+    # Overwrite Spotify keys
     existing["SPOTIPY_CLIENT_ID"] = client_id
-    existing["SPOTIPY_CLIENT_SECRET"] = client_secret
+    if client_secret:
+        existing["SPOTIPY_CLIENT_SECRET"] = client_secret
+    else:
+        # PKCE does not need secret; remove if present to avoid confusion.
+        existing.pop("SPOTIPY_CLIENT_SECRET", None)
     existing["SPOTIPY_REDIRECT_URI"] = redirect_uri
 
     try:
@@ -155,8 +162,8 @@ def start_captive_portal(host: str = config.AP_IP, port: int = config.CAPTIVE_PO
         client_id = (request.form.get("client_id") or "").strip()
         client_secret = (request.form.get("client_secret") or "").strip()
 
-        if not ssid or not password or not client_id or not client_secret:
-            return jsonify(success=False, error="請填寫所有欄位")
+        if not ssid or not password or not client_id:
+            return jsonify(success=False, error="請填寫 WiFi 與 Client ID")
         if len(password) < 8:
             return jsonify(success=False, error="密碼至少需要 8 個字元")
 

@@ -5,6 +5,9 @@ Wants=network.target
 
 [Service]
 Type=oneshot
+User=pi
+Group=pi
+Environment=HOME=/home/pi
 RemainAfterExit=yes
 ExecStart=/opt/spotipi/boot/spotipi-boot.sh
 StandardOutput=journal

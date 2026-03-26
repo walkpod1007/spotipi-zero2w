@@ -5,12 +5,15 @@ Conflicts=spotipi.service spotipi-auth.service
 
 [Service]
 Type=simple
+User=pi
+Group=pi
 WorkingDirectory=/opt/spotipi
-ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/wifi/wifi_setup.py
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/home/pi
+# Run WiFi setup under a minimal X session so wifi_qr.py can render.
+ExecStart=/usr/bin/xinit /opt/spotipi/venv/bin/python3 /opt/spotipi/wifi/wifi_setup.py -- :0 vt1 -nocursor -nolisten tcp
 Restart=always
 RestartSec=5
-Environment=DISPLAY=:0
-Environment=PYTHONUNBUFFERED=1
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=spotipi-wifi

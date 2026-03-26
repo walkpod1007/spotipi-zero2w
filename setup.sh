@@ -26,6 +26,11 @@ apt-get install -y --no-install-recommends \
     python3-pip \
     python3-venv \
     python3-pygame \
+    xserver-xorg-core \
+    xinit \
+    x11-xserver-utils \
+    openbox \
+    chromium \
     chromium-browser \
     hostapd \
     dnsmasq \
@@ -103,9 +108,9 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 log "Setup complete! ✅"
 echo ""
-warn "⚠️  REQUIRED: Fill in your Spotify Client Secret"
+warn "⚠️  REQUIRED: Fill in your Spotify Client ID (PKCE; no secret needed)"
 echo "   Edit: $INSTALL_DIR/.env"
-echo "   Set:  SPOTIPY_CLIENT_SECRET=your_secret_here"
+echo "   Set:  SPOTIPY_CLIENT_ID=your_client_id_here"
 echo ""
 warn "⚠️  REQUIRED: Add to Spotify Developer Dashboard"
 echo "   Redirect URI: http://localhost:8888/callback"

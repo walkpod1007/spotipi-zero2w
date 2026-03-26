@@ -60,8 +60,8 @@
       <label for="client_id">Spotify Client ID</label>
       <input type="text" id="client_id" name="client_id" placeholder="32 位英數字串" required>
 
-      <label for="client_secret">Spotify Client Secret</label>
-      <input type="password" id="client_secret" name="client_secret" placeholder="32 位英數字串" required>
+      <label for="client_secret">Spotify Client Secret（可留空，PKCE 不需要）</label>
+      <input type="password" id="client_secret" name="client_secret" placeholder="選填">
 
       <p style="font-size:12px;color:#888;margin-top:-12px;margin-bottom:20px;">
         請先到 <a href="https://developer.spotify.com" target="_blank" style="color:#1DB954;">developer.spotify.com</a> 建立 App，Redirect URI 填 <code style="background:#f5f5f5;padding:2px 4px;border-radius:4px;">http://spotipi.local:8888/callback</code>

@@ -6,23 +6,29 @@ Conflicts=spotipi-wifi.service spotipi-auth.service
 
 [Service]
 Type=simple
+User=pi
+Group=pi
 WorkingDirectory=/opt/spotipi
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/home/pi
 ExecStartPre=/bin/sleep 3
 ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/display/app.py
-ExecStartPost=/bin/bash -c 'sleep 4 && chromium-browser \
-  --kiosk \
-  --noerrdialogs \
-  --disable-infobars \
-  --no-first-run \
-  --disable-session-crashed-bubble \
-  --check-for-update-interval=31536000 \
-  --disable-features=TranslateUI \
-  --app=http://localhost:5000 &'
+# Start a minimal X session (no full desktop required) and launch Chromium in kiosk mode.
+ExecStartPost=/bin/bash -lc 'sleep 4; \
+  CHR=$(command -v chromium-browser || command -v chromium); \
+  if [ -z "$CHR" ]; then echo "chromium not found"; exit 127; fi; \
+  xinit "$CHR" \
+    --kiosk \
+    --noerrdialogs \
+    --disable-infobars \
+    --no-first-run \
+    --disable-session-crashed-bubble \
+    --check-for-update-interval=31536000 \
+    --disable-features=TranslateUI \
+    --app=http://localhost:5000 \
+    -- :0 vt1 -nocursor -nolisten tcp &'
 Restart=always
 RestartSec=5
-Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
-Environment=PYTHONUNBUFFERED=1
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=spotipi
