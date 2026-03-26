@@ -50,7 +50,8 @@ pip install -r requirements.txt
 
 ```bash
 export SPOTIPY_CLIENT_ID="你的_client_id"
-export SPOTIPY_CLIENT_SECRET="你的_client_secret"
+# PKCE 不需要 client secret
+# export SPOTIPY_CLIENT_SECRET=""
 export SPOTIPY_REDIRECT_URI="http://localhost:8888/callback"
 ```
 
@@ -99,7 +100,7 @@ sudo apt install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
 ### Spotify API 401 Unauthorized
 
-檢查 `SPOTIPY_CLIENT_ID` / `SPOTIPY_CLIENT_SECRET` 是否正確，刪除 `~/.spotipi/token.json` 重新授權。
+檢查 `SPOTIPY_CLIENT_ID` 是否正確，必要時刪除 `~/.spotipi/token.json` 重新授權。
 
 ### 視窗無法全螢幕
 

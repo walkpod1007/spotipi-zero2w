@@ -6,12 +6,15 @@ Conflicts=spotipi.service spotipi-wifi.service
 
 [Service]
 Type=simple
+User=pi
+Group=pi
 WorkingDirectory=/opt/spotipi
-ExecStart=/opt/spotipi/venv/bin/python3 /opt/spotipi/auth/spotify_auth.py
+Environment=PYTHONUNBUFFERED=1
+Environment=HOME=/home/pi
+# Run auth flow under a minimal X session so pygame QR can render on HDMI.
+ExecStart=/usr/bin/xinit /opt/spotipi/venv/bin/python3 /opt/spotipi/auth/spotify_auth.py -- :0 vt1 -nocursor -nolisten tcp
 Restart=always
 RestartSec=5
-Environment=DISPLAY=:0
-Environment=PYTHONUNBUFFERED=1
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=spotipi-auth
