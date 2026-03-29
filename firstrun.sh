@@ -31,6 +31,14 @@ log()  { echo -e "\033[1;32m[spotipi-firstrun]\033[0m $*"; }
 warn() { echo -e "\033[1;33m[warn]\033[0m $*"; }
 die()  { echo -e "\033[1;31m[fatal]\033[0m $*" >&2; exit 1; }
 
+# ── 必要前置：避免 WiFi 因國家碼/ rfkill 被鎖死 ─────────────────────────────
+# Pi OS 若未設定 WLAN Country，wlan0 可能被 rfkill block，導致 AP/QR 流程完全無法啟動。
+if command -v raspi-config >/dev/null 2>&1; then
+  raspi-config nonint do_wifi_country TW 2>/dev/null || true
+fi
+rfkill unblock wifi 2>/dev/null || true
+rfkill unblock all 2>/dev/null || true
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 工具函式
 # ─────────────────────────────────────────────────────────────────────────────
@@ -348,13 +356,13 @@ sudo -u "$SERVICE_USER" "$INSTALL_DIR/venv/bin/pip" install \
 if [[ -f "${PORTAL_DIR:-/dev/null}/submitted.json" ]] 2>/dev/null; then
     CLIENT_ID="$(python3 -c "import json; d=json.load(open('$PORTAL_DIR/submitted.json')); print(d.get('client_id',''))")"
     CLIENT_SECRET="$(python3 -c "import json; d=json.load(open('$PORTAL_DIR/submitted.json')); print(d.get('client_secret',''))")"
-    if [[ -n "$CLIENT_ID" && -n "$CLIENT_SECRET" ]]; then
-        log "寫入 Spotify 認證到 $INSTALL_DIR/.env..."
-        cat > "$INSTALL_DIR/.env" <<EOF
-SPOTIPY_CLIENT_ID=$CLIENT_ID
-SPOTIPY_CLIENT_SECRET=$CLIENT_SECRET
-SPOTIPY_REDIRECT_URI=http://spotipi.local:8888/callback
-EOF
+    if [[ -n "$CLIENT_ID" ]]; then
+        log "寫入 Spotify Client ID 到 $INSTALL_DIR/.env（PKCE 不需要 secret）..."
+        {
+          echo "SPOTIPY_CLIENT_ID=$CLIENT_ID"
+          [[ -n "$CLIENT_SECRET" ]] && echo "SPOTIPY_CLIENT_SECRET=$CLIENT_SECRET"
+          echo "SPOTIPY_REDIRECT_URI=http://spotipi.local:8888/callback"
+        } > "$INSTALL_DIR/.env"
         chown "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR/.env"
     fi
 fi
@@ -383,7 +391,7 @@ mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I \$TERM
 EOF
 
 BASHRC="/home/$SERVICE_USER/.bashrc"
