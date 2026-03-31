@@ -35,7 +35,8 @@ while true; do
             sleep 1
         done
 
-        exec chromium-browser \
+        CHR=$(command -v chromium-browser || command -v chromium)
+        exec "$CHR" \
             --kiosk \
             --noerrdialogs \
             --disable-infobars \
