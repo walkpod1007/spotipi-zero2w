@@ -316,10 +316,13 @@ apt-get install -y --no-install-recommends \
     python3-pip \
     python3-venv \
     python3-pygame \
+    xinit \
+    x11-xserver-utils \
     chromium-browser \
     hostapd \
     dnsmasq \
     wireless-tools \
+    rfkill \
     fonts-dejavu-core \
     libatlas-base-dev \
     libjpeg-dev
@@ -377,13 +380,19 @@ if [[ -f /etc/default/hostapd ]]; then
 fi
 systemctl mask hostapd dnsmasq 2>/dev/null || true
 
+# WiFi 無線電解鎖（台灣區域設定）
+log "設定 WLAN 國家碼為 TW 並解鎖無線電..."
+raspi-config nonint do_wifi_country TW 2>/dev/null || true
+rfkill unblock wifi 2>/dev/null || true
+rfkill unblock all  2>/dev/null || true
+
 # 自動登入
 log "設定 tty1 自動登入..."
 mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF
 [Service]
 ExecStart=
-ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I $TERM
+ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I \$TERM
 EOF
 
 BASHRC="/home/$SERVICE_USER/.bashrc"
@@ -395,6 +404,18 @@ if [[ -z "$DISPLAY" ]] && [[ "$(tty)" == "/dev/tty1" ]]; then
     startx -- -nocursor
 fi
 BASHEOF
+fi
+
+# 安裝 .xinitrc（X11 session 狀態機：WiFi QR → Auth QR → Chromium kiosk）
+XINITRC_SRC="$INSTALL_DIR/boot/xinitrc"
+XINITRC_DST="/home/$SERVICE_USER/.xinitrc"
+if [[ -f "$XINITRC_SRC" ]]; then
+    cp "$XINITRC_SRC" "$XINITRC_DST"
+    chmod +x "$XINITRC_DST"
+    chown "$SERVICE_USER:$SERVICE_USER" "$XINITRC_DST"
+    log "✅ .xinitrc 安裝完成"
+else
+    warn "找不到 $XINITRC_SRC，請確認 boot/xinitrc 存在"
 fi
 
 # 清理暫存

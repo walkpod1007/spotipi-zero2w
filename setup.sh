@@ -26,6 +26,8 @@ apt-get install -y --no-install-recommends \
     python3-pip \
     python3-venv \
     python3-pygame \
+    xinit \
+    x11-xserver-utils \
     chromium-browser \
     hostapd \
     dnsmasq \
@@ -85,6 +87,12 @@ cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $SERVICE_USER --noclear %I \$TERM
 EOF
+
+# Install .xinitrc (session orchestrator: WiFi QR → Auth QR → Chromium kiosk)
+XINITRC="/home/$SERVICE_USER/.xinitrc"
+cp "$INSTALL_DIR/boot/xinitrc" "$XINITRC"
+chmod +x "$XINITRC"
+chown "$SERVICE_USER:$SERVICE_USER" "$XINITRC"
 
 # Add startx to bashrc if running on tty1 (for Lite)
 BASHRC="/home/$SERVICE_USER/.bashrc"
